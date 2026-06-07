@@ -1,6 +1,5 @@
-flask
-flask-cors
-requests
-deep-translator
-python-dotenv
-gunicorn
+Flask==3.0.2
+flask-cors==4.0.0
+requests==2.31.0
+deep_translator==1.11.4
+gunicorn==21.2.0

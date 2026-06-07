@@ -4279,54 +4279,53 @@ async function getStreak(otherUid){
   return 0;
 }
 
-/* ============================================================
-   AI WRITER — Gemini text + image generation
-   ============================================================ */
-const GEMINI_API_KEY = 'AIzaSyDq3vKRd6v1uxJtxqcLKmRDXFpHQfFGLCg'; // placeholder - will be set via config
-// Gemini API key
-const GEMINI_BUILTIN_KEY = 'AIzaSyC145QESkTbjrp410SLLw_mXdxvd7QxYY4';
-function getGeminiKey(){ return localStorage.getItem('eggox_gemini_key')||GEMINI_BUILTIN_KEY; }
-function setGeminiKey(k){ if(k) localStorage.setItem('eggox_gemini_key',k.trim()); }
-// Image gen limit: 1 per day
-function getImageGenKey(){ return 'eggox_imggen_'+new Date().toDateString(); }
-function canGenerateImage(){ return !localStorage.getItem(getImageGenKey()); }
-function markImageGenUsed(){ localStorage.setItem(getImageGenKey(),'1'); }
 
 function openAIWriter(){
   openModal('🤖 ИИ-писатель',`
-    <div style="text-align:center;padding:24px 16px">
-      <div style="font-size:64px">🤖</div>
-      <div style="font-family:var(--font-d);font-weight:800;font-size:22px;color:var(--green-700);margin:8px 0 4px">ИИ-писатель EggoX</div>
-      <div style="display:inline-block;background:linear-gradient(135deg,#4285f4,#8b5cf6);color:#fff;border-radius:20px;padding:4px 14px;font-weight:800;font-size:13px;margin-bottom:16px">Скоро в версии 1.1</div>
-      <p style="color:var(--ink-soft);font-size:14px;line-height:1.6;margin:0">
-        Генерация текстов и изображений на базе<br>
-        <b style="color:var(--ink)">Google Gemini</b> будет доступна<br>
-        в следующем обновлении EggoX.<br><br>
-        Следите за обновлениями! 🚀
+    <div style="padding:4px 0">
+      <p style="color:var(--ink-soft);font-size:13px;line-height:1.5;margin-top:0">
+        Задайте ИИ любой вопрос. Он автоматически определит язык, сделает внутренний перевод и ответит вам!
       </p>
+      <textarea class="inp" id="aiPrompt" rows="3" placeholder="О чем напишем сегодня?..." style="resize:none; width:calc(100% - 32px); margin-bottom:12px;"></textarea>
+      <button class="btn" id="aiGenBtn" onclick="runAIText()">Сгенерировать текст</button>
+      <div id="aiResult" style="margin-top:14px; display:none; background:var(--green-050); padding:14px; border-radius:14px; font-size:14px; line-height:1.6; white-space: pre-wrap; border:1px solid var(--line);"></div>
     </div>
-    <button class="btn ghost" onclick="closeModal()">Закрыть</button>`);
-}
-function saveGeminiKey(){
-  const k = ($('#geminiKeyInput')?.value||'').trim();
-  if(!k) return toast('Введите API ключ');
-  if(!k.startsWith('AIzaSy')) return toast('Ключ должен начинаться с AIzaSy...');
-  setGeminiKey(k);
-  toast('Ключ сохранён ✓');
-  // Update the saved indicator without closing modal
-  const ind = document.querySelector('#geminiKeyInput')?.parentElement?.nextElementSibling;
-  if(ind) ind.innerHTML='<div style="font-size:11px;color:var(--green-700);margin-top:6px;font-weight:700">✅ Ключ сохранён</div>';
-}
-function changeGeminiKey(){
-  localStorage.removeItem('eggox_gemini_key');
-  openAIWriter();
+  `);
 }
 
-async function runAIText(){ openAIWriter(); }
-
-async function runAIImage(){ openAIWriter(); }
-function downloadAIImage(src){
-  const a=document.createElement('a'); a.href=src; a.download='eggox-ai-image.png'; a.click();
+async function runAIText(){
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if(!prompt) return toast('Введите текст запроса ✏️');
+  
+  const btn = document.getElementById('aiGenBtn');
+  const resBox = document.getElementById('aiResult');
+  
+  btn.textContent = 'ИИ думает... ⏳';
+  btn.disabled = true;
+  resBox.style.display = 'none';
+  
+  try {
+    fetch('https://eggox-production.up.railway.app/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt })
+    });
+    
+    const data = await response.json();
+    
+    resBox.style.display = 'block';
+    if(data.error) {
+      resBox.innerHTML = '<b style="color:var(--danger)">Ошибка:</b> ' + esc(data.error);
+    } else {
+      resBox.textContent = data.result;
+    }
+  } catch(e) {
+    resBox.style.display = 'block';
+    resBox.innerHTML = '<b style="color:var(--danger)">Ошибка связи:</b> Убедитесь, что сервер server.py запущен на компьютере!';
+  }
+  
+  btn.textContent = 'Сгенерировать текст';
+  btn.disabled = false;
 }
 
 /* ============================================================
