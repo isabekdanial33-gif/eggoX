@@ -1,15 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 import re
 from deep_translator import GoogleTranslator
 import os
 
 app = Flask(__name__)
-# Включаем CORS для всех запросов
+# Полный CORS для всех доменов
 CORS(app, resources={r"/*": {"origins": "*"}}) 
 
-# ЖЕСТКИЙ ХАК: Насильно вшиваем CORS во все ответы сервера
+# Насильно вшиваем CORS во все ответы сервера без исключения
 @app.after_request
 def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -17,7 +19,12 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
-# СПАСИТЕЛЬНЫЙ МАРШРУТ ДЛЯ RAILWAY (Health Check)
+# Создаем умную сессию запросов, которая умеет пробивать DNS-затыки контейнеров
+session = requests.Session()
+retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
+session.mount('https://', HTTPAdapter(max_retries=retries))
+
+# Маршрут проверки для Railway
 @app.route('/', methods=['GET'])
 def health_check():
     return jsonify({"status": "alive", "message": "Server is running perfectly!"}), 200
@@ -57,7 +64,8 @@ def generate():
     }
     
     try:
-        response = requests.post(API_URL, headers=HEADERS, json=payload)
+        # Используем session вместо обычного requests.post для стабильной сети
+        response = session.post(API_URL, headers=HEADERS, json=payload, timeout=10)
         
         if response.status_code != 200:
             return jsonify({"error": f"Ошибка сервера ИИ: {response.status_code}", "details": response.text}), 500
@@ -74,7 +82,7 @@ def generate():
         return jsonify({"result": ai_text_final})
         
     except Exception as e:
-        return jsonify({"error": f"Внутренняя ошибка сервера: {str(e)}"}), 500
+        return jsonify({"error": f"Внутренняя ошибка сервера (Сеть): {str(e)}"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
