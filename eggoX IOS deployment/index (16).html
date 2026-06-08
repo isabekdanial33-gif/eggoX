@@ -4293,9 +4293,9 @@ function openAIWriter(){
   `);
 }
 
-async function runAIText(){
+async function runAIText() {
   const prompt = document.getElementById('aiPrompt').value.trim();
-  if(!prompt) return toast('Введите текст запроса ✏️');
+  if (!prompt) return toast('Введите текст запроса ✏️');
   
   const btn = document.getElementById('aiGenBtn');
   const resBox = document.getElementById('aiResult');
@@ -4305,31 +4305,29 @@ async function runAIText(){
   resBox.style.display = 'none';
   
   try {
-    console.log("Отправляю запрос...");
     const response = await fetch('https://eggox-production.up.railway.app/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: prompt })
     });
     
-    console.log("Ответ от сервера получен. Статус:", response.status);
     const data = await response.json();
-    console.log("Данные от сервера:", data);
     
     resBox.style.display = 'block';
-    
-    // ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ
-    if(data.result) {
-        resBox.textContent = data.result;
+    if (data.result) {
+      resBox.textContent = data.result;
     } else {
-        resBox.textContent = "Сервер ответил, но в ответе нет поля 'result'. Ответ был: " + JSON.stringify(data);
+      resBox.textContent = "Ошибка ответа: " + JSON.stringify(data);
     }
-    
-  } catch(e) {
-    console.error("Ошибка в функции:", e);
+  } catch (e) {
     resBox.style.display = 'block';
-    resBox.innerHTML = '<b>Ошибка:</b> ' + e.message;
+    resBox.innerHTML = '<b style="color:var(--danger)">Ошибка связи:</b> Проверьте консоль!';
+    console.error(e);
   }
+  
+  btn.textContent = 'Сгенерировать текст';
+  btn.disabled = false;
+} // <--- ЭТА СКОБКА ОБЯЗАТЕЛЬНА, ОНА ЗАКРЫВАЕТ ФУНКЦИЮ runAIText
 
 /* ============================================================
    USER PROFILE PAGE — stories/posts viewer
