@@ -4305,28 +4305,31 @@ async function runAIText(){
   resBox.style.display = 'none';
   
   try {
-    fetch('https://eggox-production.up.railway.app/generate', {
+    console.log("Отправляю запрос...");
+    const response = await fetch('https://eggox-production.up.railway.app/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: prompt })
     });
     
+    console.log("Ответ от сервера получен. Статус:", response.status);
     const data = await response.json();
+    console.log("Данные от сервера:", data);
     
     resBox.style.display = 'block';
-    if(data.error) {
-      resBox.innerHTML = '<b style="color:var(--danger)">Ошибка:</b> ' + esc(data.error);
+    
+    // ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ
+    if(data.result) {
+        resBox.textContent = data.result;
     } else {
-      resBox.textContent = data.result;
+        resBox.textContent = "Сервер ответил, но в ответе нет поля 'result'. Ответ был: " + JSON.stringify(data);
     }
+    
   } catch(e) {
+    console.error("Ошибка в функции:", e);
     resBox.style.display = 'block';
-    resBox.innerHTML = '<b style="color:var(--danger)">Ошибка связи:</b> Убедитесь, что сервер server.py запущен на компьютере!';
+    resBox.innerHTML = '<b>Ошибка:</b> ' + e.message;
   }
-  
-  btn.textContent = 'Сгенерировать текст';
-  btn.disabled = false;
-}
 
 /* ============================================================
    USER PROFILE PAGE — stories/posts viewer
