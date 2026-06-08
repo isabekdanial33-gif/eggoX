@@ -4300,9 +4300,11 @@ async function runAIText() {
   const btn = document.getElementById('aiGenBtn');
   const resBox = document.getElementById('aiResult');
   
+  console.log("1. Запрос начат:", prompt);
   btn.textContent = 'ИИ думает... ⏳';
   btn.disabled = true;
-  resBox.style.display = 'none';
+  resBox.style.display = 'block'; // Сразу показываем блок
+  resBox.textContent = "Загрузка..."; // Визуальный индикатор
   
   try {
     const response = await fetch('https://eggox-production.up.railway.app/generate', {
@@ -4311,23 +4313,27 @@ async function runAIText() {
       body: JSON.stringify({ prompt: prompt })
     });
     
+    console.log("2. Статус ответа сервера:", response.status);
     const data = await response.json();
+    console.log("3. Полученные данные:", data);
     
-    resBox.style.display = 'block';
+    // Проверка, что именно пришло
     if (data.result) {
       resBox.textContent = data.result;
+    } else if (data.message) {
+      resBox.textContent = data.message;
     } else {
-      resBox.textContent = "Ошибка ответа: " + JSON.stringify(data);
+      resBox.textContent = "Сервер ответил, но мы не нашли текст в ответе. Данные: " + JSON.stringify(data);
     }
+    
   } catch (e) {
-    resBox.style.display = 'block';
-    resBox.innerHTML = '<b style="color:var(--danger)">Ошибка связи:</b> Проверьте консоль!';
-    console.error(e);
+    console.error("4. ОШИБКА:", e);
+    resBox.textContent = "Ошибка связи: " + e.message;
   }
   
   btn.textContent = 'Сгенерировать текст';
   btn.disabled = false;
-} // <--- ЭТА СКОБКА ОБЯЗАТЕЛЬНА, ОНА ЗАКРЫВАЕТ ФУНКЦИЮ runAIText
+}
 
 /* ============================================================
    USER PROFILE PAGE — stories/posts viewer
