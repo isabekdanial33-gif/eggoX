@@ -1,0 +1,39 @@
+{
+  "name": "EggoX Messenger",
+  "short_name": "EggoX",
+  "description": "Зелёный мессенджер нового поколения",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1fbf4",
+  "theme_color": "#56C271",
+  "lang": "ru",
+  "categories": ["social", "communication"],
+  "icons": [
+    { "src": "icons/icon-57.png",   "sizes": "57x57",   "type": "image/png" },
+    { "src": "icons/icon-60.png",   "sizes": "60x60",   "type": "image/png" },
+    { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png" },
+    { "src": "icons/icon-76.png",   "sizes": "76x76",   "type": "image/png" },
+    { "src": "icons/icon-96.png",   "sizes": "96x96",   "type": "image/png" },
+    { "src": "icons/icon-114.png",  "sizes": "114x114", "type": "image/png" },
+    { "src": "icons/icon-120.png",  "sizes": "120x120", "type": "image/png" },
+    { "src": "icons/icon-144.png",  "sizes": "144x144", "type": "image/png" },
+    { "src": "icons/icon-152.png",  "sizes": "152x152", "type": "image/png" },
+    { "src": "icons/icon-180.png",  "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Новый чат",
+      "short_name": "Чат",
+      "description": "Начать новый чат",
+      "url": "/?action=new_chat",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}
